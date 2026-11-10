@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="c00lgui"
+version="${mod_version}"
+displayName="c00lgui Client"
+authors="XlaysPlays"
+description='''An easy to use Minecraft hack client.'''
+
+[[dependencies.c00lgui]]
+modId="neoforge"
+type="required"
+versionRange="[21.11.45,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.c00lgui]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.11]"
+ordering="NONE"
+side="CLIENT"
