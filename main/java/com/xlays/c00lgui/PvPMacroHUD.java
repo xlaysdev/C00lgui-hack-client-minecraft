@@ -22,14 +22,16 @@ public final class PvPMacroHUD {
         MacroManager.Macro.SWORD_MACE,
         MacroManager.Macro.SWORD_WTAP,
         MacroManager.Macro.AXE_STUN_MACE,
-        MacroManager.Macro.CRIT_CHAIN
+        MacroManager.Macro.CRIT_CHAIN,
+        MacroManager.Macro.ELYTRA_MACE
     };
     private static final String[] LABELS={
         "Wind Charge > Mace",
         "Sword > Mace",
         "W-Tap Sword",
         "Axe Stun > Mace",
-        "Critical Chain"
+        "Critical Chain",
+        "Elytra > Rocket > Mace"
     };
 
     private PvPMacroHUD(){}
