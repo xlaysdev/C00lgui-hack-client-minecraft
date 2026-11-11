@@ -23,6 +23,7 @@ public final class MacroManager {
     private static float savedPitch,savedYaw;
     private static boolean sprintWasActive;
     private static String status="READY";
+    private static final int PLAYER_STORAGE_SLOTS=36;
     private MacroManager(){}
 
     public static boolean isRunning(){return active!=null;}
@@ -214,7 +215,7 @@ public final class MacroManager {
                 LivingEntity target=findTarget(p,mc,12);
                 if(target!=null)aimAt(p,target);
                 double fallen=diveStartY-p.getY();
-                if(target!=null&&fallen>=1.6&&p.getDeltaMovement().y< -0.08&&p.distanceTo(target)<=4.5F){
+                if(target!=null&&!p.isFallFlying()&&fallen>=1.6&&p.getDeltaMovement().y< -0.08&&p.distanceTo(target)<=4.5F){
                     attackTarget(p,mc,target);
                     phase=7;timeout=0;status="MACE STRIKE";
                 }else if(p.onGround()){
@@ -238,7 +239,7 @@ public final class MacroManager {
         return slot;
     }
     private static int findEmptyInventorySlot(LocalPlayer p){
-        for(int i=0;i<p.getInventory().getContainerSize();i++)if(p.getInventory().getItem(i).isEmpty())return i;
+        for(int i=0;i<PLAYER_STORAGE_SLOTS;i++)if(p.getInventory().getItem(i).isEmpty())return i;
         return -1;
     }
     private static void stashWornElytra(LocalPlayer p,Minecraft mc){
@@ -263,7 +264,7 @@ public final class MacroManager {
     }
 
     private static int findInventorySlot(LocalPlayer p,String path){
-        for(int i=0;i<p.getInventory().getContainerSize();i++){
+        for(int i=0;i<PLAYER_STORAGE_SLOTS;i++){
             var stack=p.getInventory().getItem(i);
             if(!stack.isEmpty()&&BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().equals(path))return i;
         }
