@@ -10,11 +10,12 @@ import net.minecraft.world.phys.HitResult;
 
 /** Tick-driven, user-started combat sequences. */
 public final class MacroManager {
-    public enum Macro { WIND_CHARGE_MACE, SWORD_MACE }
+    public enum Macro { WIND_CHARGE_MACE, SWORD_MACE, SWORD_WTAP, AXE_STUN_MACE, CRIT_CHAIN }
     private static Macro active;
     private static int phase, ticks, timeout;
     private static float savedPitch;
-    private static int chargeSlot=7, maceSlot=8, swordSlot=0;
+    private static int chargeSlot=7, maceSlot=8, swordSlot=0, axeSlot=1;
+    private static boolean sprintWasActive;
 
     private MacroManager() {}
 
@@ -23,19 +24,23 @@ public final class MacroManager {
     public static int getChargeSlot(){ return chargeSlot+1; }
     public static int getMaceSlot(){ return maceSlot+1; }
     public static int getSwordSlot(){ return swordSlot+1; }
+    public static int getAxeSlot(){ return axeSlot+1; }
     public static void cycleChargeSlot(int delta){chargeSlot=wrap(chargeSlot+delta);}
     public static void cycleMaceSlot(int delta){maceSlot=wrap(maceSlot+delta);}
     public static void cycleSwordSlot(int delta){swordSlot=wrap(swordSlot+delta);}
+    public static void cycleAxeSlot(int delta){axeSlot=wrap(axeSlot+delta);}
     private static int wrap(int slot){return Math.floorMod(slot,9);}
 
     public static void start(Macro macro){
         stop();
         active=macro;phase=0;ticks=0;timeout=0;
+        Minecraft mc=Minecraft.getInstance();sprintWasActive=mc.player!=null&&mc.player.isSprinting();
     }
     public static void stop(){
         Minecraft mc=Minecraft.getInstance();
         if(mc.player!=null && active==Macro.WIND_CHARGE_MACE && phase==1)
             mc.player.setXRot(savedPitch);
+        if(mc.player!=null && (active==Macro.SWORD_WTAP || active==Macro.AXE_STUN_MACE || active==Macro.CRIT_CHAIN)) mc.player.setSprinting(sprintWasActive);
         active=null;phase=0;ticks=0;timeout=0;
     }
     public static void toggle(Macro macro){if(active==macro)stop();else start(macro);}
@@ -48,6 +53,9 @@ public final class MacroManager {
         switch(active){
             case WIND_CHARGE_MACE -> tickWindCharge(player,mc);
             case SWORD_MACE -> tickSwordMace(player,mc);
+            case SWORD_WTAP -> tickWTap(player,mc);
+            case AXE_STUN_MACE -> tickAxeStun(player,mc);
+            case CRIT_CHAIN -> tickCritChain(player,mc);
         }
     }
 
@@ -100,6 +108,39 @@ public final class MacroManager {
                 }
             }
             case 3 -> {if(++ticks>=8){phase=0;ticks=0;}}
+        }
+    }
+
+
+    /** Sprint-reset combo: hit with sword, briefly release sprint, then re-engage. */
+    private static void tickWTap(LocalPlayer player,Minecraft mc){
+        switch(phase){
+            case 0 -> {player.getInventory().setSelectedSlot(swordSlot);player.setSprinting(true);attackCrosshair(player,mc);player.setSprinting(false);phase=1;ticks=0;}
+            case 1 -> {if(++ticks>=1){player.setSprinting(true);phase=2;ticks=0;}}
+            case 2 -> {if(++ticks>=7)phase=0;}
+        }
+    }
+
+    /** Axe shield-disable attempt followed by a mace follow-up; aim stays manual. */
+    private static void tickAxeStun(LocalPlayer player,Minecraft mc){
+        switch(phase){
+            case 0 -> {player.getInventory().setSelectedSlot(axeSlot);attackCrosshair(player,mc);phase=1;ticks=0;}
+            case 1 -> {if(++ticks>=2){player.getInventory().setSelectedSlot(maceSlot);attackCrosshair(player,mc);phase=2;ticks=0;}}
+            case 2 -> {if(++ticks>=10)phase=0;}
+        }
+    }
+
+    /** Critical chain: jumps when grounded and attacks on the falling portion of each jump. */
+    private static void tickCritChain(LocalPlayer player,Minecraft mc){
+        if(player.onGround()){
+            if(phase!=0){phase=0;ticks=0;}
+            player.jump();
+            return;
+        }
+        if(player.getDeltaMovement().y < -0.08 && phase==0){
+            player.getInventory().setSelectedSlot(swordSlot);
+            attackCrosshair(player,mc);
+            phase=1;
         }
     }
 
