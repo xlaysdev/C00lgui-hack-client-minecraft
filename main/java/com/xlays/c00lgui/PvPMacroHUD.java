@@ -13,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 /** Floating, draggable in-game controls for the PvP macros. */
 @EventBusSubscriber(modid=ClientMain.MOD_ID,value=Dist.CLIENT)
 public final class PvPMacroHUD {
-    private static final int WIDTH=154, HEADER=18, ROW=21, HEIGHT=HEADER+ROW*5+5;
+    private static final int WIDTH=154, HEADER=18, ROW=21, HEIGHT=HEADER+ROW*6+5;
     private static int x=8,y=34;
     private static boolean dragging=false;
     private static double dragOffsetX,dragOffsetY;
