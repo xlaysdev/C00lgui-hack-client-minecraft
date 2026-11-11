@@ -16,11 +16,8 @@ public final class ModuleManager {
     private static final Map<String, String> CATEGORIES = new LinkedHashMap<>();
     private static final Map<String, List<ModuleSetting>> SETTINGS = new LinkedHashMap<>();
 
-    private static final List<String> HIDDEN = List.of(
-            "AutoCritical",
-            "OreESP",
-            "PlayerESP"
-    );
+    // Every registered module is visible in the replacement ClickGUI.
+    private static final List<String> HIDDEN = List.of();
 
     private static final int[] COLOR_PRESETS = {
             0xFFFFAA00, // orange
