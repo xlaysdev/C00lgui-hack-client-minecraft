@@ -2,17 +2,9 @@ package com.xlays.c00lgui.modules.combat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.Random;
 
-@EventBusSubscriber(
-        modid = "c00lgui",
-        value = Dist.CLIENT
-)
 public final class AutoClicker {
 
     private static boolean enabled = false;
@@ -111,13 +103,11 @@ public final class AutoClicker {
         if (currentTime - lastClickTime >= actualDelay) {
             // Perform clicks
             if (leftClick) {
-                mc.options.keyAttack.setDown(true);
-                mc.options.keyAttack.setDown(false);
+                mc.startAttack();
             }
 
             if (rightClick) {
-                mc.options.keyUse.setDown(true);
-                mc.options.keyUse.setDown(false);
+                mc.startUseItem();
             }
 
             lastClickTime = currentTime;
@@ -147,11 +137,6 @@ public final class AutoClicker {
         }
 
         return true;
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        tick();
     }
 
     public static void disable() {
