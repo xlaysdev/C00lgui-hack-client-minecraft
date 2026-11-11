@@ -114,10 +114,10 @@ public final class ClickGuiScreen extends Screen {
             int x0=left+124,y0=top+HEADER+12,cardY=y0+44;
             if(hit(x,y,x0+340,cardY+28,124,30)){MacroManager.toggle(MacroManager.Macro.WIND_CHARGE_MACE);return true;}
             if(hit(x,y,x0+340,cardY+98+23,124,30)){MacroManager.toggle(MacroManager.Macro.SWORD_MACE);return true;}
-            if(hit(x,y,x0+150,cardY+55,24,22)){MacroManager.cycleChargeSlot(-1);return true;}
-            if(hit(x,y,x0+244,cardY+55,24,22)){MacroManager.cycleChargeSlot(1);return true;}
-            if(hit(x,y,x0+150,cardY+70,24,17)){MacroManager.cycleMaceSlot(-1);return true;}
-            if(hit(x,y,x0+244,cardY+70,24,17)){MacroManager.cycleMaceSlot(1);return true;}
+            if(hit(x,y,x0+150,cardY+54,24,16)){MacroManager.cycleChargeSlot(-1);return true;}
+            if(hit(x,y,x0+244,cardY+54,24,16)){MacroManager.cycleChargeSlot(1);return true;}
+            if(hit(x,y,x0+150,cardY+72,24,16)){MacroManager.cycleMaceSlot(-1);return true;}
+            if(hit(x,y,x0+244,cardY+72,24,16)){MacroManager.cycleMaceSlot(1);return true;}
             if(hit(x,y,x0+150,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(-1);return true;}
             if(hit(x,y,x0+244,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(1);return true;}
             return true;
@@ -157,10 +157,10 @@ public final class ClickGuiScreen extends Screen {
         g.drawString(font,"then equips the mace and attacks while falling.",x+12,cardY+39,MUTED,false);
         g.drawString(font,"Charge slot: "+MacroManager.getChargeSlot(),x+12,cardY+57,TEXT,false);
         g.drawString(font,"Mace slot: "+MacroManager.getMaceSlot(),x+12,cardY+72,TEXT,false);
-        g.fill(x+150,cardY+55,x+174,cardY+77,ALT);g.drawString(font,"-",x+159,cardY+62,TEXT,false);
-        g.fill(x+244,cardY+55,x+268,cardY+77,ALT);g.drawString(font,"+",x+253,cardY+62,TEXT,false);
-        g.fill(x+150,cardY+70,x+174,cardY+87,ALT);g.drawString(font,"-",x+159,cardY+75,TEXT,false);
-        g.fill(x+244,cardY+70,x+268,cardY+87,ALT);g.drawString(font,"+",x+253,cardY+75,TEXT,false);
+        g.fill(x+150,cardY+54,x+174,cardY+70,ALT);g.drawString(font,"-",x+159,cardY+58,TEXT,false);
+        g.fill(x+244,cardY+54,x+268,cardY+70,ALT);g.drawString(font,"+",x+253,cardY+58,TEXT,false);
+        g.fill(x+150,cardY+72,x+174,cardY+88,ALT);g.drawString(font,"-",x+159,cardY+76,TEXT,false);
+        g.fill(x+244,cardY+72,x+268,cardY+88,ALT);g.drawString(font,"+",x+253,cardY+76,TEXT,false);
         boolean wind=MacroManager.getActive()==MacroManager.Macro.WIND_CHARGE_MACE;
         g.fill(x+340,cardY+28,x+464,cardY+58,wind?0xFF69313B:0xFF24563F);
         g.drawString(font,wind?"STOP MACRO":"START MACRO",x+350,cardY+39,TEXT,false);
