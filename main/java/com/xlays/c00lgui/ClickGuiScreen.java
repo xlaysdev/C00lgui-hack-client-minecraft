@@ -141,7 +141,12 @@ public final class ClickGuiScreen extends Screen {
             if("OreESP".equals(selected)){int bx=px+10,by=py+48;if(hit(x,y,bx,by,pw-20,19)){oreFilterOpen=!oreFilterOpen;return true;}if(oreFilterOpen){int oy=by+24;for(OreESP.OreGroup group:OreESP.OreGroup.values()){if(hit(x,y,bx,oy,pw-20,21)){OreESP.toggleOre(group);C00lGuiConfig.save();return true;}oy+=23;}return true;}}
             int yy=py+55;for(ModuleSetting s:ModuleManager.getSettings(selected)){int cy=yy;if(s.getType()==ModuleSetting.Type.BOOL&&hit(x,y,px+pw-58,cy,48,18)){s.toggleBool();C00lGuiConfig.save();return true;}if(s.getType()!=ModuleSetting.Type.BOOL){double step=s.getType()==ModuleSetting.Type.INT?1.0:Math.max(.01,(s.getMax()-s.getMin())/100.0);if(hit(x,y,px+pw-54,cy,20,18)){s.adjust(-step);C00lGuiConfig.save();return true;}if(hit(x,y,px+pw-25,cy,20,18)){s.adjust(step);C00lGuiConfig.save();return true;}}yy+=25;}
         }
-        return super.mouseClicked(e,doubleClick);
+        // Consume every click while this full-screen GUI is open, including blank panel space.
+        return true;
+    }
+
+    @Override public boolean mouseReleased(MouseButtonEvent e){
+        return true;
     }
 
     @Override public boolean keyPressed(KeyEvent e){
@@ -174,7 +179,7 @@ public final class ClickGuiScreen extends Screen {
         for(int bx:minus){g.fill(bx,sy,bx+16,sy+18,ALT);g.drawString(font,"-",bx+5,sy+5,TEXT,false);}
         int[] plus={x+94,x+211,x+328,x+445};
         for(int bx:plus){g.fill(bx,sy,bx+16,sy+18,ALT);g.drawString(font,"+",bx+4,sy+5,TEXT,false);}
-        g.drawString(font,MacroManager.isRunning()?"RUNNING  -  tap active macro to stop":"IDLE",x+2,sy+23,MacroManager.isRunning()?GREEN:MUTED,false);
+        g.drawString(font,MacroManager.getStatus(),x+2,sy+23,MacroManager.isRunning()?GREEN:MUTED,false);
     }
 
     private void drawCompactSettings(GuiGraphics g,int px,int py,int pw,String module){
