@@ -18,7 +18,7 @@ public final class MacroManager {
     private static int chargeSlot=7,maceSlot=8,swordSlot=0,axeSlot=1;
     private static int activeChargeSlot=-1,activeMaceSlot=-1,activeSwordSlot=-1,activeAxeSlot=-1,rocketSlot=-1;
     private static int elytraInventorySlot=-1,elytraStashSlot=-1;
-    private static boolean elytraEquippedByMacro,elytraWasAlreadyWorn;
+    private static boolean elytraEquippedByMacro,elytraWasAlreadyWorn,elytraStashed;
     private static double diveStartY;
     private static float savedPitch,savedYaw;
     private static boolean sprintWasActive;
@@ -51,7 +51,7 @@ public final class MacroManager {
         if(mc.player!=null){
             if(active!=null){
                 if(elytraEquippedByMacro)unequipElytra(mc.player,mc);
-                if(elytraWasAlreadyWorn&&elytraStashSlot>=0)restoreStashedElytra(mc.player,mc);
+                if(elytraStashed&&elytraStashSlot>=0)restoreStashedElytra(mc.player,mc);
                 mc.player.setYRot(savedYaw);mc.player.setXRot(savedPitch);
             }
             mc.player.setSprinting(sprintWasActive);
@@ -60,7 +60,7 @@ public final class MacroManager {
         mc.options.keyUp.setDown(false);
         active=null;phase=0;ticks=0;timeout=0;
         activeChargeSlot=activeMaceSlot=activeSwordSlot=activeAxeSlot=rocketSlot=-1;
-        elytraInventorySlot=elytraStashSlot=-1;elytraEquippedByMacro=false;elytraWasAlreadyWorn=false;
+        elytraInventorySlot=elytraStashSlot=-1;elytraEquippedByMacro=false;elytraWasAlreadyWorn=false;elytraStashed=false;
         if(!status.startsWith("MISSING")&&!status.startsWith("NO "))status="READY";
     }
     public static void toggle(Macro macro){if(active==macro)stop();else start(macro);}
@@ -202,6 +202,7 @@ public final class MacroManager {
                         elytraEquippedByMacro=false;
                     }else if(elytraWasAlreadyWorn){
                         stashWornElytra(p,mc);
+                        elytraStashed=true;
                     }
                     p.getInventory().setSelectedSlot(activeMaceSlot);
                     diveStartY=p.getY();
@@ -251,7 +252,7 @@ public final class MacroManager {
         int chest=6,stash=menuSlotForInventoryIndex(elytraStashSlot);
         mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,stash,0,ClickType.PICKUP,p);
         mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,chest,0,ClickType.PICKUP,p);
-        elytraStashSlot=-1;elytraWasAlreadyWorn=false;
+        elytraStashSlot=-1;elytraWasAlreadyWorn=false;elytraStashed=false;
     }
     private static void unequipElytra(LocalPlayer p,Minecraft mc){
         if(elytraInventorySlot<0)return;
