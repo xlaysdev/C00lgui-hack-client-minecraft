@@ -3,15 +3,7 @@ package com.xlays.c00lgui.modules.combat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-@EventBusSubscriber(
-        modid = "c00lgui",
-        value = Dist.CLIENT
-)
 public final class AutoCritical {
 
     private static boolean enabled = false;
@@ -69,11 +61,6 @@ public final class AutoCritical {
         }
 
         wasAttacking = isAttacking;
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        tick();
     }
 
     public static void disable() {
