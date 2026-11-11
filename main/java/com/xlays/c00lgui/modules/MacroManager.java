@@ -54,7 +54,7 @@ public final class MacroManager {
     private static void tickWindCharge(LocalPlayer player,Minecraft mc){
         switch(phase){
             case 0 -> {
-                player.getInventory().selected=chargeSlot;
+                player.getInventory().setSelectedSlot(chargeSlot;
                 savedPitch=player.getXRot();
                 player.setXRot(88.0F);
                 phase=1;ticks=0;
@@ -73,7 +73,7 @@ public final class MacroManager {
             }
             case 3 -> {
                 // Keep the mace selected for the falling hit; the player still aims manually.
-                player.getInventory().selected=maceSlot;
+                player.getInventory().setSelectedSlot(maceSlot;
                 if(player.getDeltaMovement().y < -0.08){
                     attackCrosshair(player,mc);
                     phase=4;ticks=0;
@@ -85,11 +85,11 @@ public final class MacroManager {
 
     private static void tickSwordMace(LocalPlayer player,Minecraft mc){
         switch(phase){
-            case 0 -> {player.getInventory().selected=swordSlot;phase=1;ticks=0;}
+            case 0 -> {player.getInventory().setSelectedSlot(swordSlot;phase=1;ticks=0;}
             case 1 -> {
                 if(++ticks>=1){
                     attackCrosshair(player,mc);
-                    player.getInventory().selected=maceSlot;
+                    player.getInventory().setSelectedSlot(maceSlot;
                     phase=2;ticks=0;
                 }
             }
