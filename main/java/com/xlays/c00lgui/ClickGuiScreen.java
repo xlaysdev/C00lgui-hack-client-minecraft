@@ -114,7 +114,7 @@ public final class ClickGuiScreen extends Screen {
             }
         }
         if(b==0&&selected!=null){
-            int px=left+382,yy=top+HEADER+55,ww=216;
+            int px=left+392,yy=top+HEADER+55,ww=216;
             for(ModuleSetting s:ModuleManager.getSettings(selected)){
                 int cy=yy+12;
                 if(s.getType()==ModuleSetting.Type.BOOL&&hit(x,y,px,cy,48,16)){
