@@ -3,6 +3,7 @@ package com.xlays.c00lgui;
 import com.xlays.c00lgui.config.C00lGuiConfig;
 import com.xlays.c00lgui.modules.ModuleManager;
 import com.xlays.c00lgui.modules.ModuleSetting;
+import com.xlays.c00lgui.modules.MacroManager;
 import com.xlays.c00lgui.modules.visual.OreESP;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.Minecraft;
@@ -20,8 +21,8 @@ public final class ClickGuiScreen extends Screen {
     private static final int BG=0xE9101218,PANEL=0xFF171A22,ALT=0xFF1D222D;
     private static final int LINE=0xFF303746,TEXT=0xFFF1F4FA,MUTED=0xFF929BAA;
     private static final int GREEN=0xFF55D68B,BLUE=0xFF69A9FF,RED=0xFFFF657A;
-    private static final String[] CATS={"COMBAT","MOVEMENT","PLAYER","VISUAL"};
-    private static final int[] COLORS={0xFFFF7185,0xFF69A9FF,0xFFFFC86B,0xFFB58CFF};
+    private static final String[] CATS={"COMBAT","MOVEMENT","PLAYER","VISUAL","MACROS"};
+    private static final int[] COLORS={0xFFFF7185,0xFF69A9FF,0xFFFFC86B,0xFFB58CFF,0xFF55D6C2};
     private int left,top;
     private float guiScale=1.0F,offsetX,offsetY;
     private String category="COMBAT",selected=null;
@@ -62,33 +63,38 @@ public final class ClickGuiScreen extends Screen {
             g.drawString(font,title(CATS[i]),sx+10,y+10,active?TEXT:MUTED,false);
         }
 
-        int lx=left+124,ly=top+HEADER+12;
-        g.drawString(font,title(category)+" MODULES",lx+2,ly,TEXT,false);
-        g.drawString(font,"LMB toggle  /  RMB settings",lx+2,ly+14,MUTED,false);
-        List<String> modules=ModuleManager.getVisibleModules(category);
-        for(int i=0;i<modules.size();i++){
-            int x=lx+(i%2)*119,y=ly+34+(i/2)*41;String name=modules.get(i);
-            boolean on=ModuleManager.isEnabled(name);
-            g.fill(x,y,x+112,y+34,on?0xFF20372F:hit(mx,my,x,y,112,34)?0xFF252B37:PANEL);
-            border(g,x,y,112,34,on?0xFF397B5B:LINE);
-            g.fill(x+5,y+7,x+7,y+27,on?GREEN:0xFF586170);
-            g.drawString(font,name,x+12,y+8,on?TEXT:MUTED,false);
-            g.drawString(font,on?"ON":"OFF",x+84,y+8,on?GREEN:MUTED,false);
-        }
-
-        int px=left+372,py=top+HEADER+12,pw=236,ph=H-HEADER-FOOTER-24;
-        g.fill(px,py,px+pw,py+ph,PANEL);border(g,px,py,pw,ph,LINE);
-        g.drawString(font,"MODULE SETTINGS",px+10,py+9,MUTED,false);
-        g.fill(px+10,py+25,px+pw-10,py+26,LINE);
-        if(selected==null){g.drawString(font,"Right-click a module",px+10,py+46,MUTED,false);g.drawString(font,"to edit its settings.",px+10,py+59,MUTED,false);}
-        else{
-            g.drawString(font,selected,px+10,py+36,TEXT,false);
-            if("OreESP".equals(selected)){
-                int bx=px+10,by=py+48;g.fill(bx,by,bx+pw-20,by+19,oreFilterOpen?0xFF293449:0xFF252B37);border(g,bx,by,pw-20,19,LINE);
-                g.drawString(font,oreFilterOpen?"ORE FILTERS  [OPEN]":"ORE FILTERS  [TAP TO EDIT]",bx+7,by+6,BLUE,false);
-                if(oreFilterOpen){int oy=by+24;for(OreESP.OreGroup group:OreESP.OreGroup.values()){boolean on=OreESP.isOreEnabled(group);g.fill(bx,oy,bx+pw-20,oy+21,on?0xFF202B29:0xFF20232A);g.renderItem(new ItemStack(group.getIcon()),bx+4,oy+2);g.drawString(font,group.getLabel(),bx+26,oy+7,on?TEXT:MUTED,false);g.drawString(font,on?"ON":"OFF",bx+pw-56,oy+7,on?GREEN:MUTED,false);oy+=23;}}
-                else drawCompactSettings(g,px,py,pw,selected);
-            }else drawCompactSettings(g,px,py,pw,selected);
+        if("MACROS".equals(category)){
+            drawMacroTab(g,mx,my);
+        }else{
+            int lx=left+124,ly=top+HEADER+12;
+            g.drawString(font,title(category)+" MODULES",lx+2,ly,TEXT,false);
+            g.drawString(font,"LMB toggle  /  RMB settings",lx+2,ly+14,MUTED,false);
+            List<String> modules=ModuleManager.getVisibleModules(category);
+            for(int i=0;i<modules.size();i++){
+                int x=lx+(i%2)*119,y=ly+34+(i/2)*41;String name=modules.get(i);
+                boolean on=ModuleManager.isEnabled(name);
+                g.fill(x,y,x+112,y+34,on?0xFF20372F:hit(mx,my,x,y,112,34)?0xFF252B37:PANEL);
+                border(g,x,y,112,34,on?0xFF397B5B:LINE);
+                g.fill(x+5,y+7,x+7,y+27,on?GREEN:0xFF586170);
+                g.drawString(font,name,x+12,y+8,on?TEXT:MUTED,false);
+                g.drawString(font,on?"ON":"OFF",x+84,y+8,on?GREEN:MUTED,false);
+            }
+    
+            int px=left+372,py=top+HEADER+12,pw=236,ph=H-HEADER-FOOTER-24;
+            g.fill(px,py,px+pw,py+ph,PANEL);border(g,px,py,pw,ph,LINE);
+            g.drawString(font,"MODULE SETTINGS",px+10,py+9,MUTED,false);
+            g.fill(px+10,py+25,px+pw-10,py+26,LINE);
+            if(selected==null){g.drawString(font,"Right-click a module",px+10,py+46,MUTED,false);g.drawString(font,"to edit its settings.",px+10,py+59,MUTED,false);}
+            else{
+                g.drawString(font,selected,px+10,py+36,TEXT,false);
+                if("OreESP".equals(selected)){
+                    int bx=px+10,by=py+48;g.fill(bx,by,bx+pw-20,by+19,oreFilterOpen?0xFF293449:0xFF252B37);border(g,bx,by,pw-20,19,LINE);
+                    g.drawString(font,oreFilterOpen?"ORE FILTERS  [OPEN]":"ORE FILTERS  [TAP TO EDIT]",bx+7,by+6,BLUE,false);
+                    if(oreFilterOpen){int oy=by+24;for(OreESP.OreGroup group:OreESP.OreGroup.values()){boolean on=OreESP.isOreEnabled(group);g.fill(bx,oy,bx+pw-20,oy+21,on?0xFF202B29:0xFF20232A);g.renderItem(new ItemStack(group.getIcon()),bx+4,oy+2);g.drawString(font,group.getLabel(),bx+26,oy+7,on?TEXT:MUTED,false);g.drawString(font,on?"ON":"OFF",bx+pw-56,oy+7,on?GREEN:MUTED,false);oy+=23;}}
+                    else drawCompactSettings(g,px,py,pw,selected);
+                }else drawCompactSettings(g,px,py,pw,selected);
+            }
+    
         }
         int fy=top+H-FOOTER;g.fill(left,fy,left+W,top+H,ALT);
         g.drawString(font,"RIGHT SHIFT / ESC  •  CLOSE",left+12,fy+7,MUTED,false);
@@ -103,6 +109,18 @@ public final class ClickGuiScreen extends Screen {
         int sx=left+10,sy=top+HEADER+30;
         if(b==0)for(int i=0;i<CATS.length;i++)if(hit(x,y,sx,sy+i*34,102,28)){
             category=CATS[i];selected=null;return true;
+        }
+        if("MACROS".equals(category)&&b==0){
+            int x0=left+124,y0=top+HEADER+12,cardY=y0+44;
+            if(hit(x,y,x0+340,cardY+28,124,30)){MacroManager.toggle(MacroManager.Macro.WIND_CHARGE_MACE);return true;}
+            if(hit(x,y,x0+340,cardY+98+23,124,30)){MacroManager.toggle(MacroManager.Macro.SWORD_MACE);return true;}
+            if(hit(x,y,x0+150,cardY+55,24,22)){MacroManager.cycleChargeSlot(-1);return true;}
+            if(hit(x,y,x0+244,cardY+55,24,22)){MacroManager.cycleChargeSlot(1);return true;}
+            if(hit(x,y,x0+150,cardY+70,24,17)){MacroManager.cycleMaceSlot(-1);return true;}
+            if(hit(x,y,x0+244,cardY+70,24,17)){MacroManager.cycleMaceSlot(1);return true;}
+            if(hit(x,y,x0+150,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(-1);return true;}
+            if(hit(x,y,x0+244,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(1);return true;}
+            return true;
         }
         int lx=left+124,ly=top+HEADER+46;
         List<String> modules=ModuleManager.getVisibleModules(category);
@@ -127,6 +145,39 @@ public final class ClickGuiScreen extends Screen {
         if(e.key()==GLFW.GLFW_KEY_ESCAPE||e.key()==GLFW.GLFW_KEY_RIGHT_SHIFT){closeGui();return true;}
         return super.keyPressed(e);
     }
+    private void drawMacroTab(GuiGraphics g,int mx,int my){
+        int x=left+124,y=top+HEADER+12,w=484;
+        g.drawString(font,"MACRO AUTOMATION",x+2,y,TEXT,false);
+        g.drawString(font,"INPUT MODE  /  "+DeviceDetector.getInputLabel(),x+2,y+15,BLUE,false);
+        g.fill(x,y+34,x+w,y+35,LINE);
+        int cardY=y+44;
+        g.fill(x,cardY,x+w,cardY+88,PANEL);border(g,x,cardY,w,88,LINE);
+        g.drawString(font,"WIND CHARGE  →  MACE SLAM",x+12,cardY+10,TEXT,false);
+        g.drawString(font,"Aim at the ground. Fires a charge downward, waits for lift,",x+12,cardY+27,MUTED,false);
+        g.drawString(font,"then equips the mace and attacks while falling.",x+12,cardY+39,MUTED,false);
+        g.drawString(font,"Charge slot: "+MacroManager.getChargeSlot(),x+12,cardY+57,TEXT,false);
+        g.drawString(font,"Mace slot: "+MacroManager.getMaceSlot(),x+12,cardY+72,TEXT,false);
+        g.fill(x+150,cardY+55,x+174,cardY+77,ALT);g.drawString(font,"-",x+159,cardY+62,TEXT,false);
+        g.fill(x+244,cardY+55,x+268,cardY+77,ALT);g.drawString(font,"+",x+253,cardY+62,TEXT,false);
+        g.fill(x+150,cardY+70,x+174,cardY+87,ALT);g.drawString(font,"-",x+159,cardY+75,TEXT,false);
+        g.fill(x+244,cardY+70,x+268,cardY+87,ALT);g.drawString(font,"+",x+253,cardY+75,TEXT,false);
+        boolean wind=MacroManager.getActive()==MacroManager.Macro.WIND_CHARGE_MACE;
+        g.fill(x+340,cardY+28,x+464,cardY+58,wind?0xFF69313B:0xFF24563F);
+        g.drawString(font,wind?"STOP MACRO":"START MACRO",x+350,cardY+39,TEXT,false);
+
+        int second=cardY+98;
+        g.fill(x,second,x+w,second+76,PANEL);border(g,x,second,w,76,LINE);
+        g.drawString(font,"SWORD  →  MACE COMBO",x+12,second+10,TEXT,false);
+        g.drawString(font,"Sword hit, quick swap to mace, then follow-up attack.",x+12,second+29,MUTED,false);
+        g.drawString(font,"Sword slot: "+MacroManager.getSwordSlot()+"   Mace slot: "+MacroManager.getMaceSlot(),x+12,second+49,TEXT,false);
+        g.fill(x+150,second+45,x+174,second+67,ALT);g.drawString(font,"-",x+159,second+52,TEXT,false);
+        g.fill(x+244,second+45,x+268,second+67,ALT);g.drawString(font,"+",x+253,second+52,TEXT,false);
+        boolean sword=MacroManager.getActive()==MacroManager.Macro.SWORD_MACE;
+        g.fill(x+340,second+23,x+464,second+53,sword?0xFF69313B:0xFF24563F);
+        g.drawString(font,sword?"STOP MACRO":"START MACRO",x+350,second+34,TEXT,false);
+        g.drawString(font,MacroManager.isRunning()?"STATUS: RUNNING  •  STOP BEFORE OPENING MENUS":"STATUS: IDLE",x+2,second+88,MacroManager.isRunning()?GREEN:MUTED,false);
+    }
+
     private void drawCompactSettings(GuiGraphics g,int px,int py,int pw,String module){
         List<ModuleSetting> settings=ModuleManager.getSettings(module);if(settings.isEmpty()){g.drawString(font,"No configurable settings",px+10,py+58,MUTED,false);return;}int y=py+55;
         for(ModuleSetting s:settings){g.drawString(font,s.getName(),px+10,y+5,TEXT,false);if(s.getType()==ModuleSetting.Type.BOOL){boolean v=s.getValue() instanceof Boolean b&&b;int bx=px+pw-58;g.fill(bx,y,bx+48,y+18,v?0xFF24563F:0xFF343B48);g.drawString(font,v?"ON":"OFF",bx+14,y+5,v?GREEN:MUTED,false);}else{int bx=px+pw-54;g.fill(bx,y,bx+20,y+18,0xFF343B48);g.fill(px+pw-25,y,px+pw-5,y+18,0xFF343B48);g.drawString(font,"-",bx+7,y+5,TEXT,false);g.drawString(font,"+",px+pw-18,y+5,TEXT,false);String v=s.displayValue();g.drawString(font,v,px+pw-84-font.width(v)/2,y+5,BLUE,false);}y+=25;}
