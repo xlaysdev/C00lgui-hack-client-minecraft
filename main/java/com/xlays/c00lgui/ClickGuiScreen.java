@@ -159,7 +159,7 @@ public final class ClickGuiScreen extends Screen {
         g.drawString(font,"INPUT MODE  /  "+DeviceDetector.getInputLabel(),x+2,y+15,BLUE,false);
         g.fill(x,y+34,x+w,y+35,LINE);
         String[] names={"WIND CHARGE  ->  MACE SLAM","SWORD  ->  MACE COMBO","W-TAP SWORD COMBO","AXE SHIELD STUN  ->  MACE","SWORD CRITICAL CHAIN","ELYTRA  ->  MACE DIVE"};
-        String[] desc={"Auto aim, launch, swap and strike on descent","Auto target, sword hit then mace follow-up","Auto aim and sprint reset","Axe hit then mace follow-up","Jump and attack during the fall","Equip elytra, boost, dive-track and mace strike"};
+        String[] desc={"Auto aim, launch, swap and strike on descent","Auto target, sword hit then mace follow-up","Auto aim and sprint reset","Axe hit then mace follow-up","Jump and attack during the fall","Firework boost, auto-dive, unequip Elytra, falling Mace smash"};
         MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN,MacroManager.Macro.ELYTRA_MACE};
         int rowY=y+44;
         for(int i=0;i<macros.length;i++){
