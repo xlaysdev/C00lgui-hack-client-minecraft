@@ -44,7 +44,7 @@ public final class MacroManager {
         if(active==null)return;
         Minecraft mc=Minecraft.getInstance();
         LocalPlayer player=mc.player;
-        if(player==null||mc.level==null||mc.gameMode==null||mc.screen!=null){stop();return;}
+        if(player==null||mc.level==null||mc.gameMode==null||(mc.screen!=null && !(mc.screen instanceof com.xlays.c00lgui.ClickGuiScreen))){stop();return;}
         switch(active){
             case WIND_CHARGE_MACE -> tickWindCharge(player,mc);
             case SWORD_MACE -> tickSwordMace(player,mc);
