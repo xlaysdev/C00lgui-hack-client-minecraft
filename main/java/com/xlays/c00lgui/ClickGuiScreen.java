@@ -38,7 +38,7 @@ public final class ClickGuiScreen extends Screen {
 
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
         g.fill(0,0,width,height,0x99000000);
-        g.pose().pushPose();
+        g.pose().pushMatrix();
         g.pose().translate(offsetX,offsetY);
         g.pose().scale(guiScale,guiScale);
         g.fill(left-2,top-2,left+W+2,top+H+2,0x55000000);
@@ -105,7 +105,7 @@ public final class ClickGuiScreen extends Screen {
         int fy=top+H-FOOTER;g.fill(left,fy,left+W,top+H,ALT);
         g.drawString(font,"RIGHT SHIFT / ESC  •  CLOSE",left+12,fy+7,MUTED,false);
         g.drawString(font,ModuleManager.getEnabledModules().size()+" ENABLED",left+W-86,fy+7,GREEN,false);
-        g.pose().popPose();
+        g.pose().popMatrix();
         super.render(g,mx,my,partial);
     }
 
