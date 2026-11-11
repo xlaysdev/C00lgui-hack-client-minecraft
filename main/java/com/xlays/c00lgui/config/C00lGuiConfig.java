@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class C00lGuiConfig {
-
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String FILE_NAME = "c00lgui.json";
 
@@ -30,48 +29,33 @@ public final class C00lGuiConfig {
     public static void save() {
         Path path = configPath();
         try {
-            if (path.getParent() != null) {
-                Files.createDirectories(path.getParent());
-            }
-
+            Files.createDirectories(path.getParent());
             JsonObject root = new JsonObject();
-
-            // enabled
             JsonObject enabled = new JsonObject();
-            for (String category : ModuleManager.getAllCategories()) {
-                for (String module : ModuleManager.getVisibleModules(category)) {
-                    enabled.addProperty(module, ModuleManager.isEnabled(module));
-                }
-            }
-            root.add("enabled", enabled);
-
-            // settings
             JsonObject settingsRoot = new JsonObject();
+
             for (String category : ModuleManager.getAllCategories()) {
-                for (String module : ModuleManager.getVisibleModules(category)) {
+                for (String module : ModuleManager.getModules(category)) {
+                    enabled.addProperty(module, ModuleManager.isEnabled(module));
                     List<ModuleSetting> list = ModuleManager.getSettings(module);
                     if (list.isEmpty()) continue;
 
                     JsonObject moduleSettings = new JsonObject();
-                    for (ModuleSetting s : list) {
-                        Object v = s.getValue();
-                        if (v instanceof Boolean b) {
-                            moduleSettings.addProperty(s.getName(), b);
-                        } else if (v instanceof Number n) {
-                            moduleSettings.addProperty(s.getName(), n);
-                        } else if (v != null) {
-                            moduleSettings.addProperty(s.getName(), v.toString());
-                        }
+                    for (ModuleSetting setting : list) {
+                        Object value = setting.getValue();
+                        if (value instanceof Boolean b) moduleSettings.addProperty(setting.getName(), b);
+                        else if (value instanceof Number n) moduleSettings.addProperty(setting.getName(), n);
+                        else if (value != null) moduleSettings.addProperty(setting.getName(), value.toString());
                     }
                     settingsRoot.add(module, moduleSettings);
                 }
             }
+
+            root.add("enabled", enabled);
             root.add("settings", settingsRoot);
-
-            try (Writer w = Files.newBufferedWriter(path)) {
-                GSON.toJson(root, w);
+            try (Writer writer = Files.newBufferedWriter(path)) {
+                GSON.toJson(root, writer);
             }
-
         } catch (IOException e) {
             System.err.println("[c00lgui] Failed to save config: " + e.getMessage());
         }
@@ -79,44 +63,45 @@ public final class C00lGuiConfig {
 
     public static void load() {
         Path path = configPath();
-        if (!Files.exists(path)) return;
+        if (!Files.isRegularFile(path)) return;
 
-        try (Reader r = Files.newBufferedReader(path)) {
-            JsonObject root = JsonParser.parseReader(r).getAsJsonObject();
+        try (Reader reader = Files.newBufferedReader(path)) {
+            var parsed = JsonParser.parseReader(reader);
+            if (!parsed.isJsonObject()) return;
+            JsonObject root = parsed.getAsJsonObject();
 
-            if (root.has("enabled")) {
+            if (root.has("enabled") && root.get("enabled").isJsonObject()) {
                 JsonObject enabled = root.getAsJsonObject("enabled");
-                for (Map.Entry<String, com.google.gson.JsonElement> e : enabled.entrySet()) {
-                    String module = e.getKey();
-                    boolean value = e.getValue().getAsBoolean();
-                    if (ModuleManager.isEnabled(module) != value) {
-                        ModuleManager.setEnabled(module, value);
-                    }
+                for (Map.Entry<String, com.google.gson.JsonElement> entry : enabled.entrySet()) {
+                    if (!entry.getValue().isJsonPrimitive()
+                            || !entry.getValue().getAsJsonPrimitive().isBoolean()) continue;
+                    ModuleManager.setEnabled(entry.getKey(), entry.getValue().getAsBoolean());
                 }
             }
 
-            if (root.has("settings")) {
+            if (root.has("settings") && root.get("settings").isJsonObject()) {
                 JsonObject settingsRoot = root.getAsJsonObject("settings");
                 for (Map.Entry<String, com.google.gson.JsonElement> moduleEntry : settingsRoot.entrySet()) {
-                    String module = moduleEntry.getKey();
-                    List<ModuleSetting> list = ModuleManager.getSettings(module);
-                    if (list.isEmpty()) continue;
-
+                    if (!moduleEntry.getValue().isJsonObject()) continue;
                     JsonObject moduleSettings = moduleEntry.getValue().getAsJsonObject();
 
-                    for (ModuleSetting s : list) {
-                        if (!moduleSettings.has(s.getName())) continue;
-                        com.google.gson.JsonElement value = moduleSettings.get(s.getName());
-
-                        switch (s.getType()) {
-                            case BOOL -> s.setValue(value.getAsBoolean());
-                            case INT -> s.setValue(value.getAsInt());
-                            case DOUBLE -> s.setValue(value.getAsDouble());
+                    for (ModuleSetting setting : ModuleManager.getSettings(moduleEntry.getKey())) {
+                        if (!moduleSettings.has(setting.getName())) continue;
+                        var value = moduleSettings.get(setting.getName());
+                        if (!value.isJsonPrimitive()) continue;
+                        try {
+                            switch (setting.getType()) {
+                                case BOOL -> setting.setValue(value.getAsBoolean());
+                                case INT -> setting.setValue(value.getAsInt());
+                                case DOUBLE -> setting.setValue(value.getAsDouble());
+                            }
+                        } catch (RuntimeException ignored) {
+                            System.err.println("[c00lgui] Ignoring invalid setting: "
+                                    + moduleEntry.getKey() + "." + setting.getName());
                         }
                     }
                 }
             }
-
         } catch (Exception e) {
             System.err.println("[c00lgui] Failed to load config: " + e.getMessage());
         }
