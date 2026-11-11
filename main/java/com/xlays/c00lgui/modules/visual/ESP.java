@@ -55,7 +55,7 @@ public final class ESP {
         for (Player player : TARGETS) {
             AABB box = player.getBoundingBox();
             GizmoStyle style = GizmoStyle.stroke(color, 2.0F);
-            Gizmos.cuboid(box, style);
+            Gizmos.cuboid(box, style).setAlwaysOnTop();
         }
     }
 
