@@ -160,11 +160,11 @@ public final class ClickGuiScreen extends Screen {
         g.fill(x,y+34,x+w,y+35,LINE);
         String[] names={"WIND CHARGE  ->  MACE SLAM","SWORD  ->  MACE COMBO","W-TAP SWORD COMBO","AXE SHIELD STUN  ->  MACE","SWORD CRITICAL CHAIN","ELYTRA  ->  MACE DIVE"};
         String[] desc={"Auto aim, launch, swap and strike on descent","Auto target, sword hit then mace follow-up","Auto aim and sprint reset","Axe hit then mace follow-up","Jump and attack during the fall","Equip elytra, boost, dive-track and mace strike"};
-        MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
+        MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN,MacroManager.Macro.ELYTRA_MACE};
         int rowY=y+44;
         for(int i=0;i<macros.length;i++){
             int ry=rowY+i*35;boolean active=MacroManager.getActive()==macros[i];
-            g.fill(x,ry,x+w,ry+31,PANEL);border(g,x,ry,w,34,LINE);
+            g.fill(x,ry,x+w,ry+31,PANEL);border(g,x,ry,w,31,LINE);
             g.drawString(font,names[i],x+9,ry+5,TEXT,false);
             g.drawString(font,desc[i],x+9,ry+18,MUTED,false);
             g.fill(x+340,ry+5,x+464,ry+27,active?0xFF69313B:0xFF24563F);
