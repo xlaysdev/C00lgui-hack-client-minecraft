@@ -325,6 +325,7 @@ public final class ModuleManager {
     }
 
     public static void tick() {
+        MacroManager.tick();
         Speed.tick();
         Fly.tick();
         AirJump.tick();
