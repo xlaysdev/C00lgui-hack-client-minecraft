@@ -45,7 +45,7 @@ public final class PlayerESP {
         for (Player player : PLAYERS) {
             if (player == null || !player.isAlive()) continue;
             GizmoStyle style = GizmoStyle.stroke(color, 2.0F);
-            Gizmos.cuboid(player.getBoundingBox(), style);
+            Gizmos.cuboid(player.getBoundingBox(), style).setAlwaysOnTop();
         }
     }
 
