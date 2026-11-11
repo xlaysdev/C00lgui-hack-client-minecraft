@@ -1,9 +1,12 @@
 package com.xlays.c00lgui.modules.combat;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 import java.util.Random;
+import org.lwjgl.glfw.GLFW;
 
 public final class AutoClicker {
 
@@ -103,11 +106,11 @@ public final class AutoClicker {
         if (currentTime - lastClickTime >= actualDelay) {
             // Perform clicks
             if (leftClick) {
-                mc.startAttack();
+                KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_1));
             }
 
             if (rightClick) {
-                mc.startUseItem();
+                KeyMapping.click(InputConstants.Type.MOUSE.getOrCreate(GLFW.GLFW_MOUSE_BUTTON_2));
             }
 
             lastClickTime = currentTime;
