@@ -8,17 +8,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.List;
 
-@EventBusSubscriber(
-        modid = "c00lgui",
-        value = Dist.CLIENT
-)
 public final class KillAura {
 
     private static boolean enabled = false;
@@ -113,7 +105,7 @@ public final class KillAura {
 
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null) return;
+        if (player == null || mc.level == null || mc.gameMode == null) return;
 
         if (mc.screen != null) return;
 
@@ -185,11 +177,6 @@ public final class KillAura {
         }
 
         return false;
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        tick();
     }
 
     public static void disable() {
