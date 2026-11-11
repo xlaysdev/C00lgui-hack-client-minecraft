@@ -16,6 +16,11 @@ public final class PvPMacroHUD {
     private static final int WIDTH=154, HEADER=18, ROW=21, HEIGHT=HEADER+ROW*6+5;
     private static int x=8,y=34;
     private static boolean dragging=false;
+    private static boolean visible=true;
+
+    public static boolean isVisible(){return visible;}
+    public static void setVisible(boolean value){visible=value;dragging=false;}
+    public static void toggleVisible(){setVisible(!visible);}
     private static double dragOffsetX,dragOffsetY;
     private static final MacroManager.Macro[] MACROS={
         MacroManager.Macro.WIND_CHARGE_MACE,
@@ -39,7 +44,7 @@ public final class PvPMacroHUD {
     @SubscribeEvent
     public static void render(RenderGuiEvent.Post event){
         Minecraft mc=Minecraft.getInstance();
-        if(mc.player==null||mc.options.hideGui||mc.screen!=null)return;
+        if(!visible||mc.player==null||mc.options.hideGui||mc.screen!=null)return;
         GuiGraphics g=event.getGuiGraphics();
         int sw=mc.getWindow().getGuiScaledWidth(),sh=mc.getWindow().getGuiScaledHeight();
         if(dragging&&mc.mouseHandler.isLeftPressed()){
@@ -69,7 +74,7 @@ public final class PvPMacroHUD {
     @SubscribeEvent
     public static void onMouseButton(InputEvent.MouseButton.Pre event){
         Minecraft mc=Minecraft.getInstance();
-        if(mc.player==null||mc.screen!=null||mc.options.hideGui||event.getButton()!=GLFW.GLFW_MOUSE_BUTTON_1)return;
+        if(!visible||mc.player==null||mc.screen!=null||mc.options.hideGui||event.getButton()!=GLFW.GLFW_MOUSE_BUTTON_1)return;
         double mx=mc.mouseHandler.getScaledXPos(mc.getWindow());
         double my=mc.mouseHandler.getScaledYPos(mc.getWindow());
         if(event.getAction()==GLFW.GLFW_RELEASE){
@@ -80,6 +85,8 @@ public final class PvPMacroHUD {
         if(inside(mx,my,x,y,WIDTH,HEADER)){
             dragging=true;dragOffsetX=mx-x;dragOffsetY=my-y;event.setCanceled(true);return;
         }
+        // Consume every click inside the panel so it never activates the world underneath.
+        if(inside(mx,my,x,y,WIDTH,HEIGHT))event.setCanceled(true);
         for(int i=0;i<MACROS.length;i++){
             int ry=y+HEADER+3+i*ROW;
             if(inside(mx,my,x+4,ry,WIDTH-8,ROW-2)){
