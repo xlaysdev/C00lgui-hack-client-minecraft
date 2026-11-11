@@ -111,15 +111,18 @@ public final class ClickGuiScreen extends Screen {
             category=CATS[i];selected=null;return true;
         }
         if("MACROS".equals(category)&&b==0){
-            int x0=left+124,y0=top+HEADER+12,cardY=y0+44;
-            if(hit(x,y,x0+340,cardY+28,124,30)){MacroManager.toggle(MacroManager.Macro.WIND_CHARGE_MACE);return true;}
-            if(hit(x,y,x0+340,cardY+98+23,124,30)){MacroManager.toggle(MacroManager.Macro.SWORD_MACE);return true;}
-            if(hit(x,y,x0+150,cardY+54,24,16)){MacroManager.cycleChargeSlot(-1);return true;}
-            if(hit(x,y,x0+244,cardY+54,24,16)){MacroManager.cycleChargeSlot(1);return true;}
-            if(hit(x,y,x0+150,cardY+72,24,16)){MacroManager.cycleMaceSlot(-1);return true;}
-            if(hit(x,y,x0+244,cardY+72,24,16)){MacroManager.cycleMaceSlot(1);return true;}
-            if(hit(x,y,x0+150,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(-1);return true;}
-            if(hit(x,y,x0+244,cardY+98+45,24,22)){MacroManager.cycleSwordSlot(1);return true;}
+            int x0=left+124,y0=top+HEADER+12,rowY=y0+44;
+            MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
+            for(int i=0;i<macros.length;i++)if(hit(x,y,x0+340,rowY+i*39+5,124,25)){MacroManager.toggle(macros[i]);return true;}
+            int sy=rowY+5*39+3;
+            if(hit(x,y,x0+73,sy,16,18)){MacroManager.cycleChargeSlot(-1);return true;}
+            if(hit(x,y,x0+94,sy,16,18)){MacroManager.cycleChargeSlot(1);return true;}
+            if(hit(x,y,x0+190,sy,16,18)){MacroManager.cycleMaceSlot(-1);return true;}
+            if(hit(x,y,x0+211,sy,16,18)){MacroManager.cycleMaceSlot(1);return true;}
+            if(hit(x,y,x0+307,sy,16,18)){MacroManager.cycleSwordSlot(-1);return true;}
+            if(hit(x,y,x0+328,sy,16,18)){MacroManager.cycleSwordSlot(1);return true;}
+            if(hit(x,y,x0+424,sy,16,18)){MacroManager.cycleAxeSlot(-1);return true;}
+            if(hit(x,y,x0+445,sy,16,18)){MacroManager.cycleAxeSlot(1);return true;}
             return true;
         }
         int lx=left+124,ly=top+HEADER+46;
@@ -147,35 +150,31 @@ public final class ClickGuiScreen extends Screen {
     }
     private void drawMacroTab(GuiGraphics g,int mx,int my){
         int x=left+124,y=top+HEADER+12,w=484;
-        g.drawString(font,"MACRO AUTOMATION",x+2,y,TEXT,false);
+        g.drawString(font,"PVP MACROS",x+2,y,TEXT,false);
         g.drawString(font,"INPUT MODE  /  "+DeviceDetector.getInputLabel(),x+2,y+15,BLUE,false);
         g.fill(x,y+34,x+w,y+35,LINE);
-        int cardY=y+44;
-        g.fill(x,cardY,x+w,cardY+88,PANEL);border(g,x,cardY,w,88,LINE);
-        g.drawString(font,"WIND CHARGE  →  MACE SLAM",x+12,cardY+10,TEXT,false);
-        g.drawString(font,"Aim at the ground. Fires a charge downward, waits for lift,",x+12,cardY+27,MUTED,false);
-        g.drawString(font,"then equips the mace and attacks while falling.",x+12,cardY+39,MUTED,false);
-        g.drawString(font,"Charge slot: "+MacroManager.getChargeSlot(),x+12,cardY+57,TEXT,false);
-        g.drawString(font,"Mace slot: "+MacroManager.getMaceSlot(),x+12,cardY+72,TEXT,false);
-        g.fill(x+150,cardY+54,x+174,cardY+70,ALT);g.drawString(font,"-",x+159,cardY+58,TEXT,false);
-        g.fill(x+244,cardY+54,x+268,cardY+70,ALT);g.drawString(font,"+",x+253,cardY+58,TEXT,false);
-        g.fill(x+150,cardY+72,x+174,cardY+88,ALT);g.drawString(font,"-",x+159,cardY+76,TEXT,false);
-        g.fill(x+244,cardY+72,x+268,cardY+88,ALT);g.drawString(font,"+",x+253,cardY+76,TEXT,false);
-        boolean wind=MacroManager.getActive()==MacroManager.Macro.WIND_CHARGE_MACE;
-        g.fill(x+340,cardY+28,x+464,cardY+58,wind?0xFF69313B:0xFF24563F);
-        g.drawString(font,wind?"STOP MACRO":"START MACRO",x+350,cardY+39,TEXT,false);
-
-        int second=cardY+98;
-        g.fill(x,second,x+w,second+76,PANEL);border(g,x,second,w,76,LINE);
-        g.drawString(font,"SWORD  →  MACE COMBO",x+12,second+10,TEXT,false);
-        g.drawString(font,"Sword hit, quick swap to mace, then follow-up attack.",x+12,second+29,MUTED,false);
-        g.drawString(font,"Sword slot: "+MacroManager.getSwordSlot()+"   Mace slot: "+MacroManager.getMaceSlot(),x+12,second+49,TEXT,false);
-        g.fill(x+150,second+45,x+174,second+67,ALT);g.drawString(font,"-",x+159,second+52,TEXT,false);
-        g.fill(x+244,second+45,x+268,second+67,ALT);g.drawString(font,"+",x+253,second+52,TEXT,false);
-        boolean sword=MacroManager.getActive()==MacroManager.Macro.SWORD_MACE;
-        g.fill(x+340,second+23,x+464,second+53,sword?0xFF69313B:0xFF24563F);
-        g.drawString(font,sword?"STOP MACRO":"START MACRO",x+350,second+34,TEXT,false);
-        g.drawString(font,MacroManager.isRunning()?"STATUS: RUNNING  •  STOP BEFORE OPENING MENUS":"STATUS: IDLE",x+2,second+88,MacroManager.isRunning()?GREEN:MUTED,false);
+        String[] names={"WIND CHARGE  ->  MACE SLAM","SWORD  ->  MACE COMBO","W-TAP SWORD COMBO","AXE SHIELD STUN  ->  MACE","SWORD CRITICAL CHAIN"};
+        String[] desc={"Launch upward, swap to mace on the fall; aim manually","Sword hit, swap to mace, then follow-up","Sprint reset after each crosshair sword hit","Axe hit attempt, then quick mace follow-up","Jump when grounded; attack during the fall"};
+        MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
+        int rowY=y+44;
+        for(int i=0;i<macros.length;i++){
+            int ry=rowY+i*39;boolean active=MacroManager.getActive()==macros[i];
+            g.fill(x,ry,x+w,ry+34,PANEL);border(g,x,ry,w,34,LINE);
+            g.drawString(font,names[i],x+9,ry+6,TEXT,false);
+            g.drawString(font,desc[i],x+9,ry+20,MUTED,false);
+            g.fill(x+340,ry+5,x+464,ry+29,active?0xFF69313B:0xFF24563F);
+            g.drawString(font,active?"STOP":"START",x+387,ry+13,TEXT,false);
+        }
+        int sy=rowY+5*39+3;
+        g.drawString(font,"CHG "+MacroManager.getChargeSlot(),x+2,sy+5,TEXT,false);
+        g.drawString(font,"MACE "+MacroManager.getMaceSlot(),x+119,sy+5,TEXT,false);
+        g.drawString(font,"SWORD "+MacroManager.getSwordSlot(),x+236,sy+5,TEXT,false);
+        g.drawString(font,"AXE "+MacroManager.getAxeSlot(),x+353,sy+5,TEXT,false);
+        int[] minus={x+73,x+190,x+307,x+424};
+        for(int bx:minus){g.fill(bx,sy,bx+16,sy+18,ALT);g.drawString(font,"-",bx+5,sy+5,TEXT,false);}
+        int[] plus={x+94,x+211,x+328,x+445};
+        for(int bx:plus){g.fill(bx,sy,bx+16,sy+18,ALT);g.drawString(font,"+",bx+4,sy+5,TEXT,false);}
+        g.drawString(font,MacroManager.isRunning()?"RUNNING  -  tap active macro to stop":"IDLE",x+2,sy+23,MacroManager.isRunning()?GREEN:MUTED,false);
     }
 
     private void drawCompactSettings(GuiGraphics g,int px,int py,int pw,String module){
