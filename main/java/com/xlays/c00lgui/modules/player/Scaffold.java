@@ -9,18 +9,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-@EventBusSubscriber(
-        modid = "c00lgui",
-        value = Dist.CLIENT
-)
 public final class Scaffold {
 
     private static boolean enabled = false;
@@ -275,11 +267,6 @@ public final class Scaffold {
 
         player.setYRot(currentYaw + yawDiff);
         player.setXRot(currentPitch + pitchDiff);
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        tick();
     }
 
     public static void disable() {
