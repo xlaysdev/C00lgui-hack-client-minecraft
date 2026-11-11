@@ -5,12 +5,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+@EventBusSubscriber(modid = "c00lgui", value = Dist.CLIENT)
 public final class CriticalHUD {
 
     private static boolean enabled = true;
