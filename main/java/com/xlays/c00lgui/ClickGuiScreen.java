@@ -71,7 +71,7 @@ public final class ClickGuiScreen extends Screen {
             g.drawString(font,selected,px+10,py+36,TEXT,false);
             List<ModuleSetting> settings=ModuleManager.getSettings(selected);
             if(settings.isEmpty())g.drawString(font,"No configurable settings",px+10,py+57,MUTED,false);
-            int y=py+54;
+            int y=py+43;
             for(ModuleSetting s:settings){
                 g.drawString(font,s.getName(),px+10,y,TEXT,false);
                 int cy2=y+13,ww=pw-20;
@@ -86,7 +86,7 @@ public final class ClickGuiScreen extends Screen {
                     g.drawString(font,"+",px+ww-4,cy2+4,TEXT,false);
                     String v=s.displayValue();g.drawString(font,v,px+10+(ww-font.width(v))/2,cy2+4,BLUE,false);
                 }
-                y+=34;
+                y+=29;
             }
         }
         int fy=top+H-FOOTER;g.fill(left,fy,left+W,top+H,ALT);
@@ -114,9 +114,9 @@ public final class ClickGuiScreen extends Screen {
             }
         }
         if(b==0&&selected!=null){
-            int px=left+382,yy=top+HEADER+66,ww=216;
+            int px=left+382,yy=top+HEADER+55,ww=216;
             for(ModuleSetting s:ModuleManager.getSettings(selected)){
-                int cy=yy+13;
+                int cy=yy+12;
                 if(s.getType()==ModuleSetting.Type.BOOL&&hit(x,y,px,cy,48,16)){
                     s.toggleBool();C00lGuiConfig.save();return true;
                 }
@@ -125,7 +125,7 @@ public final class ClickGuiScreen extends Screen {
                     if(hit(x,y,px,cy,22,16)){s.adjust(-step);C00lGuiConfig.save();return true;}
                     if(hit(x,y,px+ww-22,cy,22,16)){s.adjust(step);C00lGuiConfig.save();return true;}
                 }
-                yy+=34;
+                yy+=29;
             }
         }
         return super.mouseClicked(e,doubleClick);
