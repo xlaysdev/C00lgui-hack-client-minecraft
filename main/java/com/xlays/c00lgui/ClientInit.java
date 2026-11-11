@@ -56,7 +56,7 @@ public final class ClientInit {
 
         while (OPEN_GUI.consumeClick()) {
             if (mc.screen == null) {
-                mc.setScreen(new C00lGuiScreen());
+                mc.setScreen(new ClickGuiScreen());
             } else if (mc.screen instanceof C00lGuiScreen) {
                 mc.setScreen(null);
             }
