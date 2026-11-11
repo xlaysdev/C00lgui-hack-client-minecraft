@@ -41,6 +41,7 @@ public final class MacroManager {
         if(mc.player!=null && active==Macro.WIND_CHARGE_MACE && phase==1)
             mc.player.setXRot(savedPitch);
         if(mc.player!=null && (active==Macro.SWORD_WTAP || active==Macro.AXE_STUN_MACE || active==Macro.CRIT_CHAIN)) mc.player.setSprinting(sprintWasActive);
+        mc.options.keyJump.setDown(false);
         active=null;phase=0;ticks=0;timeout=0;
     }
     public static void toggle(Macro macro){if(active==macro)stop();else start(macro);}
@@ -132,16 +133,23 @@ public final class MacroManager {
 
     /** Critical chain: jumps when grounded and attacks on the falling portion of each jump. */
     private static void tickCritChain(LocalPlayer player,Minecraft mc){
-        if(player.onGround()){
-            if(phase!=0){phase=0;ticks=0;}
-            player.jump();
+        if(phase==0 && player.onGround()){
+            player.getInventory().setSelectedSlot(swordSlot);
+            mc.options.keyJump.setDown(true);
+            phase=1;
             return;
         }
-        if(player.getDeltaMovement().y < -0.08 && phase==0){
-            player.getInventory().setSelectedSlot(swordSlot);
-            attackCrosshair(player,mc);
-            phase=1;
+        if(phase==1){
+            mc.options.keyJump.setDown(false);
+            phase=2;
+            return;
         }
+        if(phase==2 && player.getDeltaMovement().y < -0.08){
+            attackCrosshair(player,mc);
+            phase=3;
+            return;
+        }
+        if(phase==3 && player.onGround())phase=0;
     }
 
     private static void attackCrosshair(LocalPlayer player,Minecraft mc){
