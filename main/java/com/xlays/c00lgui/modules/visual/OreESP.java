@@ -14,7 +14,7 @@ import java.util.List;
 public final class OreESP {
 
     private static boolean enabled = false;
-    private static int radius = 16;
+    private static int radius = 12;
     private static int tickCounter = 0;
     private static final List<BlockPos> ORES = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public final class OreESP {
         }
 
         tickCounter++;
-        if (tickCounter < 20) return;
+        if (tickCounter < 10) return;
         tickCounter = 0;
 
         BlockPos center = player.blockPosition();
