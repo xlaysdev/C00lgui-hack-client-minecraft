@@ -21,13 +21,26 @@ public final class ClickGuiScreen extends Screen {
     private static final String[] CATS={"COMBAT","MOVEMENT","PLAYER","VISUAL"};
     private static final int[] COLORS={0xFFFF7185,0xFF69A9FF,0xFFFFC86B,0xFFB58CFF};
     private int left,top;
+    private float guiScale=1.0F,offsetX,offsetY;
     private String category="COMBAT",selected=null;
 
     public ClickGuiScreen(){super(Component.literal("c00lgui"));}
-    @Override protected void init(){super.init();left=Math.max(6,(width-W)/2);top=Math.max(6,(height-H)/2);}
+    @Override protected void init(){
+        super.init();
+        // Keep the full interface visible on small screens and scale it up slightly on larger ones.
+        guiScale=Math.min(1.15F,Math.min((width-24.0F)/W,(height-24.0F)/H));
+        guiScale=Math.max(0.1F,guiScale);
+        offsetX=(width-W*guiScale)/2.0F;
+        offsetY=(height-H*guiScale)/2.0F;
+        left=0;
+        top=0;
+    }
 
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
         g.fill(0,0,width,height,0x99000000);
+        g.pose().pushPose();
+        g.pose().translate(offsetX,offsetY);
+        g.pose().scale(guiScale,guiScale);
         g.fill(left-2,top-2,left+W+2,top+H+2,0x55000000);
         g.fill(left,top,left+W,top+H,BG); border(g,left,top,W,H,LINE);
         g.fill(left,top,left+W,top+HEADER,ALT);g.fill(left,top+HEADER-1,left+W,top+HEADER,BLUE);
@@ -92,11 +105,12 @@ public final class ClickGuiScreen extends Screen {
         int fy=top+H-FOOTER;g.fill(left,fy,left+W,top+H,ALT);
         g.drawString(font,"RIGHT SHIFT / ESC  •  CLOSE",left+12,fy+7,MUTED,false);
         g.drawString(font,ModuleManager.getEnabledModules().size()+" ENABLED",left+W-86,fy+7,GREEN,false);
+        g.pose().popPose();
         super.render(g,mx,my,partial);
     }
 
     @Override public boolean mouseClicked(MouseButtonEvent e,boolean doubleClick){
-        int x=(int)e.x(),y=(int)e.y(),b=e.button(),cx=left+W-25;
+        int x=(int)((e.x()-offsetX)/guiScale),y=(int)((e.y()-offsetY)/guiScale),b=e.button(),cx=left+W-25;
         if(b==0&&hit(x,y,cx,top+8,16,14)){closeGui();return true;}
         int sx=left+10,sy=top+HEADER+30;
         if(b==0)for(int i=0;i<CATS.length;i++)if(hit(x,y,sx,sy+i*34,102,28)){
