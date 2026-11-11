@@ -7,17 +7,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.List;
 
-@EventBusSubscriber(
-        modid = "c00lgui",
-        value = Dist.CLIENT
-)
 public final class AimAssist {
 
     private static boolean enabled = false;
@@ -183,11 +175,6 @@ public final class AimAssist {
             player.setYRot(currentYaw + yawStep);
             player.setXRot(currentPitch + pitchStep);
         }
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        tick();
     }
 
     public static void disable() {
