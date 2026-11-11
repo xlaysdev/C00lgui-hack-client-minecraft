@@ -17,6 +17,9 @@ public final class MacroManager {
     private static int phase,ticks,timeout;
     private static int chargeSlot=7,maceSlot=8,swordSlot=0,axeSlot=1;
     private static int activeChargeSlot=-1,activeMaceSlot=-1,activeSwordSlot=-1,activeAxeSlot=-1,rocketSlot=-1;
+    private static int elytraInventorySlot=-1,elytraStashSlot=-1;
+    private static boolean elytraEquippedByMacro,elytraWasAlreadyWorn;
+    private static double diveStartY;
     private static float savedPitch,savedYaw;
     private static boolean sprintWasActive;
     private static String status="READY";
@@ -46,13 +49,18 @@ public final class MacroManager {
     public static void stop(){
         Minecraft mc=Minecraft.getInstance();
         if(mc.player!=null){
-            if(active!=null){mc.player.setYRot(savedYaw);mc.player.setXRot(savedPitch);}
+            if(active!=null){
+                if(elytraEquippedByMacro)unequipElytra(mc.player,mc);
+                if(elytraWasAlreadyWorn&&elytraStashSlot>=0)restoreStashedElytra(mc.player,mc);
+                mc.player.setYRot(savedYaw);mc.player.setXRot(savedPitch);
+            }
             mc.player.setSprinting(sprintWasActive);
         }
         mc.options.keyJump.setDown(false);
         mc.options.keyUp.setDown(false);
         active=null;phase=0;ticks=0;timeout=0;
         activeChargeSlot=activeMaceSlot=activeSwordSlot=activeAxeSlot=rocketSlot=-1;
+        elytraInventorySlot=elytraStashSlot=-1;elytraEquippedByMacro=false;elytraWasAlreadyWorn=false;
         if(!status.startsWith("MISSING")&&!status.startsWith("NO "))status="READY";
     }
     public static void toggle(Macro macro){if(active==macro)stop();else start(macro);}
@@ -127,28 +135,37 @@ public final class MacroManager {
         else if(phase==3&&p.onGround()){phase=0;status="RETRYING";}
     }
 
-    /** Elytra automation: equip chest slot, launch, boost, dive-track, swap to mace and strike. */
+    /** Elytra mace: launch, firework boost, dive, unequip before the falling mace hit. */
     private static void tickElytraMace(LocalPlayer p,Minecraft mc){
         switch(phase){
             case 0 -> {
-                int elytra=findInventorySlot(p,"elytra");
-                if(elytra<0){missing("ELYTRA");return;}
-                equipChestItem(p,mc,elytra);
-                activeMaceSlot=findAndEquip(p,mc,"mace",maceSlot);
+                String chestPath=BuiltInRegistries.ITEM.getKey(p.getItemBySlot(EquipmentSlot.CHEST).getItem()).getPath();
+                elytraWasAlreadyWorn=chestPath.equals("elytra");
+                if(elytraWasAlreadyWorn){
+                    elytraStashSlot=findEmptyInventorySlot(p);
+                    if(elytraStashSlot<0){missing("EMPTY INVENTORY SLOT");return;}
+                }else{
+                    elytraInventorySlot=findInventorySlot(p,"elytra");
+                    if(elytraInventorySlot<0){missing("ELYTRA");return;}
+                    equipChestItem(p,mc,elytraInventorySlot);
+                    elytraEquippedByMacro=true;
+                }
+                int macePreferred=safeHotbarSlot(maceSlot,elytraInventorySlot);
+                activeMaceSlot=findAndEquip(p,mc,"mace",macePreferred);
                 if(activeMaceSlot<0){missing("MACE");return;}
-                rocketSlot=findAndEquip(p,mc,"firework_rocket",6);
+                int rocketPreferred=safeHotbarSlot(6,elytraInventorySlot);
+                if(rocketPreferred==activeMaceSlot)rocketPreferred=safeHotbarSlot(5,elytraInventorySlot);
+                rocketSlot=findAndEquip(p,mc,"firework_rocket",rocketPreferred);
                 if(rocketSlot<0){missing("FIREWORK ROCKET");return;}
-                phase=1;ticks=0;status="ELYTRA EQUIPPED - GET AIRBORNE";
+                phase=1;ticks=0;timeout=0;status="ELYTRA READY - JUMP";
             }
             case 1 -> {
                 if(p.onGround()){
                     mc.options.keyJump.setDown(true);
-                    if(++ticks>2){mc.options.keyJump.setDown(false);ticks=0;status="WAITING FOR FALL";phase=2;}
-                }else{
-                    mc.options.keyJump.setDown(false);
-                    if(p.getDeltaMovement().y<0){mc.options.keyJump.setDown(true);phase=3;timeout=0;status="DEPLOYING ELYTRA";}
-                    else if(++timeout>80){phase=2;timeout=0;}
-                }
+                    if(++ticks>=2){mc.options.keyJump.setDown(false);ticks=0;phase=2;status="WAITING TO FALL";}
+                }else if(p.getDeltaMovement().y<0){
+                    mc.options.keyJump.setDown(true);phase=3;timeout=0;status="DEPLOYING ELYTRA";
+                }else if(++timeout>100){missing("JUMP FROM A LEDGE");}
             }
             case 2 -> {
                 mc.options.keyJump.setDown(false);
@@ -161,32 +178,87 @@ public final class MacroManager {
                     p.getInventory().setSelectedSlot(rocketSlot);
                     mc.options.keyUp.setDown(true);
                     mc.gameMode.useItem(p,InteractionHand.MAIN_HAND);
-                    phase=4;timeout=0;status="BOOSTING";
-                }else if(++timeout>40){status="ELYTRA NOT DEPLOYED";phase=1;timeout=0;}
+                    phase=4;ticks=0;timeout=0;status="FIREWORK BOOST";
+                }else if(++timeout>40){phase=1;timeout=0;status="ELYTRA NOT DEPLOYED - RETRY";}
             }
             case 4 -> {
                 mc.options.keyUp.setDown(true);
-                LivingEntity t=findTarget(p,mc,32);
-                if(t!=null)aimAt(p,t);else p.setXRot(35.0F);
-                if(++ticks>=20){
-                    p.getInventory().setSelectedSlot(activeMaceSlot);
-                    phase=5;status="DIVING";
-                }
+                LivingEntity target=findTarget(p,mc,32);
+                if(target!=null)aimAt(p,target);else p.setXRot(8.0F);
+                if(++ticks>=24){phase=5;ticks=0;timeout=0;status="DIVING - TRACKING TARGET";}
             }
             case 5 -> {
                 mc.options.keyUp.setDown(true);
-                LivingEntity t=findTarget(p,mc,32);
-                if(t!=null)aimAt(p,t);else p.setXRot(55.0F);
-                if(t!=null&&p.distanceTo(t)<=4.5F&&p.getDeltaMovement().y>0.05){
-                    attackTarget(p,mc,t);phase=6;ticks=0;status="MACE STRIKE";
-                }else if(!p.isFallFlying()&&p.onGround()){phase=0;ticks=0;status="LANDED - RESETTING";}
-                else if(++timeout>100){phase=6;ticks=0;status="DIVE COMPLETE";}
+                LivingEntity target=findTarget(p,mc,32);
+                if(target!=null){
+                    aimAt(p,target);
+                    p.setXRot(Math.max(18.0F,p.getXRot()));
+                }else p.setXRot(55.0F);
+                // Stop gliding while there is still room to build a real falling distance.
+                if((target!=null&&p.distanceTo(target)<=12.0F)||++timeout>=45){
+                    mc.options.keyUp.setDown(false);
+                    if(elytraEquippedByMacro){
+                        unequipElytra(p,mc);
+                        elytraEquippedByMacro=false;
+                    }else if(elytraWasAlreadyWorn){
+                        stashWornElytra(p,mc);
+                    }
+                    p.getInventory().setSelectedSlot(activeMaceSlot);
+                    diveStartY=p.getY();
+                    phase=6;timeout=0;status="ELYTRA OFF - FALLING FOR MACE";
+                }
             }
             case 6 -> {
                 mc.options.keyUp.setDown(false);
-                if(p.onGround()||!p.isFallFlying()&&p.getDeltaMovement().y>=0){phase=0;timeout=0;status="READY FOR NEXT RUN";}
+                LivingEntity target=findTarget(p,mc,12);
+                if(target!=null)aimAt(p,target);
+                double fallen=diveStartY-p.getY();
+                if(target!=null&&fallen>=1.6&&p.getDeltaMovement().y< -0.08&&p.distanceTo(target)<=4.5F){
+                    attackTarget(p,mc,target);
+                    phase=7;timeout=0;status="MACE STRIKE";
+                }else if(p.onGround()){
+                    phase=7;timeout=0;status="LANDED - NO SMASH HIT";
+                }else if(++timeout>100){
+                    phase=7;timeout=0;status="DIVE MISSED";
+                }
+            }
+            case 7 -> {
+                if(p.onGround()){
+                    if(elytraWasAlreadyWorn&&elytraStashSlot>=0)restoreStashedElytra(p,mc);
+                    phase=0;ticks=0;timeout=0;status="LANDED - READY FOR NEXT RUN";
+                }
             }
         }
+    }
+
+    private static int safeHotbarSlot(int preferred,int reservedInventorySlot){
+        int slot=wrap(preferred);
+        if(reservedInventorySlot>=0&&reservedInventorySlot<9&&slot==reservedInventorySlot)slot=wrap(slot+1);
+        return slot;
+    }
+    private static int findEmptyInventorySlot(LocalPlayer p){
+        for(int i=0;i<p.getInventory().getContainerSize();i++)if(p.getInventory().getItem(i).isEmpty())return i;
+        return -1;
+    }
+    private static void stashWornElytra(LocalPlayer p,Minecraft mc){
+        if(elytraStashSlot<0)return;
+        int chest=6,stash=menuSlotForInventoryIndex(elytraStashSlot);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,chest,0,ClickType.PICKUP,p);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,stash,0,ClickType.PICKUP,p);
+    }
+    private static void restoreStashedElytra(LocalPlayer p,Minecraft mc){
+        if(elytraStashSlot<0)return;
+        int chest=6,stash=menuSlotForInventoryIndex(elytraStashSlot);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,stash,0,ClickType.PICKUP,p);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,chest,0,ClickType.PICKUP,p);
+        elytraStashSlot=-1;elytraWasAlreadyWorn=false;
+    }
+    private static void unequipElytra(LocalPlayer p,Minecraft mc){
+        if(elytraInventorySlot<0)return;
+        int source=menuSlotForInventoryIndex(elytraInventorySlot),chest=6;
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,chest,0,ClickType.PICKUP,p);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,source,0,ClickType.PICKUP,p);
+        mc.gameMode.handleInventoryMouseClick(p.inventoryMenu.containerId,chest,0,ClickType.PICKUP,p);
     }
 
     private static int findInventorySlot(LocalPlayer p,String path){
