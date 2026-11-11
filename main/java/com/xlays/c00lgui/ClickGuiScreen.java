@@ -3,6 +3,8 @@ package com.xlays.c00lgui;
 import com.xlays.c00lgui.config.C00lGuiConfig;
 import com.xlays.c00lgui.modules.ModuleManager;
 import com.xlays.c00lgui.modules.ModuleSetting;
+import com.xlays.c00lgui.modules.visual.OreESP;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,6 +25,7 @@ public final class ClickGuiScreen extends Screen {
     private int left,top;
     private float guiScale=1.0F,offsetX,offsetY;
     private String category="COMBAT",selected=null;
+    private boolean oreFilterOpen=false;
 
     public ClickGuiScreen(){super(Component.literal("c00lgui"));}
     @Override protected void init(){
@@ -77,30 +80,15 @@ public final class ClickGuiScreen extends Screen {
         g.fill(px,py,px+pw,py+ph,PANEL);border(g,px,py,pw,ph,LINE);
         g.drawString(font,"MODULE SETTINGS",px+10,py+9,MUTED,false);
         g.fill(px+10,py+25,px+pw-10,py+26,LINE);
-        if(selected==null){
-            g.drawString(font,"Right-click a module",px+10,py+46,MUTED,false);
-            g.drawString(font,"to edit its settings.",px+10,py+59,MUTED,false);
-        }else{
+        if(selected==null){g.drawString(font,"Right-click a module",px+10,py+46,MUTED,false);g.drawString(font,"to edit its settings.",px+10,py+59,MUTED,false);}
+        else{
             g.drawString(font,selected,px+10,py+36,TEXT,false);
-            List<ModuleSetting> settings=ModuleManager.getSettings(selected);
-            if(settings.isEmpty())g.drawString(font,"No configurable settings",px+10,py+57,MUTED,false);
-            int y=py+43;
-            for(ModuleSetting s:settings){
-                g.drawString(font,s.getName(),px+10,y,TEXT,false);
-                int cy2=y+13,ww=pw-20;
-                if(s.getType()==ModuleSetting.Type.BOOL){
-                    boolean v=s.getValue() instanceof Boolean b&&b;
-                    g.fill(px+10,cy2,px+58,cy2+16,v?0xFF24563F:0xFF343B48);
-                    g.drawString(font,v?"ON":"OFF",px+25,cy2+4,v?GREEN:MUTED,false);
-                }else{
-                    g.fill(px+10,cy2,px+32,cy2+16,0xFF343B48);
-                    g.fill(px+10+ww-22,cy2,px+10+ww,cy2+16,0xFF343B48);
-                    g.drawString(font,"-",px+19,cy2+4,TEXT,false);
-                    g.drawString(font,"+",px+ww-4,cy2+4,TEXT,false);
-                    String v=s.displayValue();g.drawString(font,v,px+10+(ww-font.width(v))/2,cy2+4,BLUE,false);
-                }
-                y+=29;
-            }
+            if("OreESP".equals(selected)){
+                int bx=px+10,by=py+48;g.fill(bx,by,bx+pw-20,by+19,oreFilterOpen?0xFF293449:0xFF252B37);border(g,bx,by,pw-20,19,LINE);
+                g.drawString(font,oreFilterOpen?"ORE FILTERS  [OPEN]":"ORE FILTERS  [TAP TO EDIT]",bx+7,by+6,BLUE,false);
+                if(oreFilterOpen){int oy=by+24;for(OreESP.OreGroup group:OreESP.OreGroup.values()){boolean on=OreESP.isOreEnabled(group);g.fill(bx,oy,bx+pw-20,oy+21,on?0xFF202B29:0xFF20232A);g.renderItem(new ItemStack(group.getIcon()),bx+4,oy+2);g.drawString(font,group.getLabel(),bx+26,oy+7,on?TEXT:MUTED,false);g.drawString(font,on?"ON":"OFF",bx+pw-56,oy+7,on?GREEN:MUTED,false);oy+=23;}}
+                else drawCompactSettings(g,px,py,pw,selected);
+            }else drawCompactSettings(g,px,py,pw,selected);
         }
         int fy=top+H-FOOTER;g.fill(left,fy,left+W,top+H,ALT);
         g.drawString(font,"RIGHT SHIFT / ESC  •  CLOSE",left+12,fy+7,MUTED,false);
@@ -128,19 +116,9 @@ public final class ClickGuiScreen extends Screen {
             }
         }
         if(b==0&&selected!=null){
-            int px=left+392,yy=top+HEADER+55,ww=216;
-            for(ModuleSetting s:ModuleManager.getSettings(selected)){
-                int cy=yy+12;
-                if(s.getType()==ModuleSetting.Type.BOOL&&hit(x,y,px,cy,48,16)){
-                    s.toggleBool();C00lGuiConfig.save();return true;
-                }
-                if(s.getType()!=ModuleSetting.Type.BOOL){
-                    double step=s.getType()==ModuleSetting.Type.INT?1.0:Math.max(.01,(s.getMax()-s.getMin())/100.0);
-                    if(hit(x,y,px,cy,22,16)){s.adjust(-step);C00lGuiConfig.save();return true;}
-                    if(hit(x,y,px+ww-22,cy,22,16)){s.adjust(step);C00lGuiConfig.save();return true;}
-                }
-                yy+=29;
-            }
+            int px=left+372,py=top+HEADER+12,pw=236;
+            if("OreESP".equals(selected)){int bx=px+10,by=py+48;if(hit(x,y,bx,by,pw-20,19)){oreFilterOpen=!oreFilterOpen;return true;}if(oreFilterOpen){int oy=by+24;for(OreESP.OreGroup group:OreESP.OreGroup.values()){if(hit(x,y,bx,oy,pw-20,21)){OreESP.toggleOre(group);C00lGuiConfig.save();return true;}oy+=23;}return true;}}
+            int yy=py+55;for(ModuleSetting s:ModuleManager.getSettings(selected)){int cy=yy;if(s.getType()==ModuleSetting.Type.BOOL&&hit(x,y,px+pw-58,cy,48,18)){s.toggleBool();C00lGuiConfig.save();return true;}if(s.getType()!=ModuleSetting.Type.BOOL){double step=s.getType()==ModuleSetting.Type.INT?1.0:Math.max(.01,(s.getMax()-s.getMin())/100.0);if(hit(x,y,px+pw-54,cy,20,18)){s.adjust(-step);C00lGuiConfig.save();return true;}if(hit(x,y,px+pw-25,cy,20,18)){s.adjust(step);C00lGuiConfig.save();return true;}}yy+=25;}
         }
         return super.mouseClicked(e,doubleClick);
     }
@@ -149,6 +127,11 @@ public final class ClickGuiScreen extends Screen {
         if(e.key()==GLFW.GLFW_KEY_ESCAPE||e.key()==GLFW.GLFW_KEY_RIGHT_SHIFT){closeGui();return true;}
         return super.keyPressed(e);
     }
+    private void drawCompactSettings(GuiGraphics g,int px,int py,int pw,String module){
+        List<ModuleSetting> settings=ModuleManager.getSettings(module);if(settings.isEmpty()){g.drawString(font,"No configurable settings",px+10,py+58,MUTED,false);return;}int y=py+55;
+        for(ModuleSetting s:settings){g.drawString(font,s.getName(),px+10,y+5,TEXT,false);if(s.getType()==ModuleSetting.Type.BOOL){boolean v=s.getValue() instanceof Boolean b&&b;int bx=px+pw-58;g.fill(bx,y,bx+48,y+18,v?0xFF24563F:0xFF343B48);g.drawString(font,v?"ON":"OFF",bx+14,y+5,v?GREEN:MUTED,false);}else{int bx=px+pw-54;g.fill(bx,y,bx+20,y+18,0xFF343B48);g.fill(px+pw-25,y,px+pw-5,y+18,0xFF343B48);g.drawString(font,"-",bx+7,y+5,TEXT,false);g.drawString(font,"+",px+pw-18,y+5,TEXT,false);String v=s.displayValue();g.drawString(font,v,px+pw-84-font.width(v)/2,y+5,BLUE,false);}y+=25;}
+    }
+
     private void closeGui(){C00lGuiConfig.save();Minecraft.getInstance().setScreen(null);}
     @Override public boolean isPauseScreen(){return false;}
     private static boolean hit(int mx,int my,int x,int y,int w,int h){return mx>=x&&mx<x+w&&my>=y&&my<y+h;}
