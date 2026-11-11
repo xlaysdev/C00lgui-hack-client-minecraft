@@ -104,7 +104,7 @@ public final class OreESP {
             Block block = mc.level.getBlockState(pos).getBlock();
             int color = getColor(block);
             GizmoStyle style = GizmoStyle.stroke(color, 2.0F);
-            Gizmos.cuboid(pos, style);
+            Gizmos.cuboid(pos, style).setAlwaysOnTop();
         }
     }
 
