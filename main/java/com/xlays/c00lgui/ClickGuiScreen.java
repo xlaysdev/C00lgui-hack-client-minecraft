@@ -112,9 +112,9 @@ public final class ClickGuiScreen extends Screen {
         }
         if("MACROS".equals(category)&&b==0){
             int x0=left+124,y0=top+HEADER+12,rowY=y0+44;
-            MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
-            for(int i=0;i<macros.length;i++)if(hit(x,y,x0+340,rowY+i*39+5,124,25)){MacroManager.toggle(macros[i]);return true;}
-            int slotY=rowY+5*39+3;
+            MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN,MacroManager.Macro.ELYTRA_MACE};
+            for(int i=0;i<macros.length;i++)if(hit(x,y,x0+340,rowY+i*35+3,124,25)){MacroManager.toggle(macros[i]);return true;}
+            int slotY=rowY+6*35+3;
             if(hit(x,y,x0+73,slotY,16,18)){MacroManager.cycleChargeSlot(-1);return true;}
             if(hit(x,y,x0+94,slotY,16,18)){MacroManager.cycleChargeSlot(1);return true;}
             if(hit(x,y,x0+190,slotY,16,18)){MacroManager.cycleMaceSlot(-1);return true;}
@@ -158,19 +158,19 @@ public final class ClickGuiScreen extends Screen {
         g.drawString(font,"PVP MACROS",x+2,y,TEXT,false);
         g.drawString(font,"INPUT MODE  /  "+DeviceDetector.getInputLabel(),x+2,y+15,BLUE,false);
         g.fill(x,y+34,x+w,y+35,LINE);
-        String[] names={"WIND CHARGE  ->  MACE SLAM","SWORD  ->  MACE COMBO","W-TAP SWORD COMBO","AXE SHIELD STUN  ->  MACE","SWORD CRITICAL CHAIN"};
-        String[] desc={"Launch upward, swap to mace on the fall; aim manually","Sword hit, swap to mace, then follow-up","Sprint reset after each crosshair sword hit","Axe hit attempt, then quick mace follow-up","Jump when grounded; attack during the fall"};
+        String[] names={"WIND CHARGE  ->  MACE SLAM","SWORD  ->  MACE COMBO","W-TAP SWORD COMBO","AXE SHIELD STUN  ->  MACE","SWORD CRITICAL CHAIN","ELYTRA  ->  MACE DIVE"};
+        String[] desc={"Auto aim, launch, swap and strike on descent","Auto target, sword hit then mace follow-up","Auto aim and sprint reset","Axe hit then mace follow-up","Jump and attack during the fall","Equip elytra, boost, dive-track and mace strike"};
         MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
         int rowY=y+44;
         for(int i=0;i<macros.length;i++){
-            int ry=rowY+i*39;boolean active=MacroManager.getActive()==macros[i];
-            g.fill(x,ry,x+w,ry+34,PANEL);border(g,x,ry,w,34,LINE);
-            g.drawString(font,names[i],x+9,ry+6,TEXT,false);
-            g.drawString(font,desc[i],x+9,ry+20,MUTED,false);
-            g.fill(x+340,ry+5,x+464,ry+29,active?0xFF69313B:0xFF24563F);
-            g.drawString(font,active?"STOP":"START",x+387,ry+13,TEXT,false);
+            int ry=rowY+i*35;boolean active=MacroManager.getActive()==macros[i];
+            g.fill(x,ry,x+w,ry+31,PANEL);border(g,x,ry,w,34,LINE);
+            g.drawString(font,names[i],x+9,ry+5,TEXT,false);
+            g.drawString(font,desc[i],x+9,ry+18,MUTED,false);
+            g.fill(x+340,ry+5,x+464,ry+27,active?0xFF69313B:0xFF24563F);
+            g.drawString(font,active?"STOP":"START",x+387,ry+11,TEXT,false);
         }
-        int sy=rowY+5*39+3;
+        int sy=rowY+6*35+3;
         g.drawString(font,"CHG "+MacroManager.getChargeSlot(),x+2,sy+5,TEXT,false);
         g.drawString(font,"MACE "+MacroManager.getMaceSlot(),x+119,sy+5,TEXT,false);
         g.drawString(font,"SWORD "+MacroManager.getSwordSlot(),x+236,sy+5,TEXT,false);
