@@ -114,15 +114,15 @@ public final class ClickGuiScreen extends Screen {
             int x0=left+124,y0=top+HEADER+12,rowY=y0+44;
             MacroManager.Macro[] macros={MacroManager.Macro.WIND_CHARGE_MACE,MacroManager.Macro.SWORD_MACE,MacroManager.Macro.SWORD_WTAP,MacroManager.Macro.AXE_STUN_MACE,MacroManager.Macro.CRIT_CHAIN};
             for(int i=0;i<macros.length;i++)if(hit(x,y,x0+340,rowY+i*39+5,124,25)){MacroManager.toggle(macros[i]);return true;}
-            int sy=rowY+5*39+3;
-            if(hit(x,y,x0+73,sy,16,18)){MacroManager.cycleChargeSlot(-1);return true;}
-            if(hit(x,y,x0+94,sy,16,18)){MacroManager.cycleChargeSlot(1);return true;}
-            if(hit(x,y,x0+190,sy,16,18)){MacroManager.cycleMaceSlot(-1);return true;}
-            if(hit(x,y,x0+211,sy,16,18)){MacroManager.cycleMaceSlot(1);return true;}
-            if(hit(x,y,x0+307,sy,16,18)){MacroManager.cycleSwordSlot(-1);return true;}
-            if(hit(x,y,x0+328,sy,16,18)){MacroManager.cycleSwordSlot(1);return true;}
-            if(hit(x,y,x0+424,sy,16,18)){MacroManager.cycleAxeSlot(-1);return true;}
-            if(hit(x,y,x0+445,sy,16,18)){MacroManager.cycleAxeSlot(1);return true;}
+            int slotY=rowY+5*39+3;
+            if(hit(x,y,x0+73,slotY,16,18)){MacroManager.cycleChargeSlot(-1);return true;}
+            if(hit(x,y,x0+94,slotY,16,18)){MacroManager.cycleChargeSlot(1);return true;}
+            if(hit(x,y,x0+190,slotY,16,18)){MacroManager.cycleMaceSlot(-1);return true;}
+            if(hit(x,y,x0+211,slotY,16,18)){MacroManager.cycleMaceSlot(1);return true;}
+            if(hit(x,y,x0+307,slotY,16,18)){MacroManager.cycleSwordSlot(-1);return true;}
+            if(hit(x,y,x0+328,slotY,16,18)){MacroManager.cycleSwordSlot(1);return true;}
+            if(hit(x,y,x0+424,slotY,16,18)){MacroManager.cycleAxeSlot(-1);return true;}
+            if(hit(x,y,x0+445,slotY,16,18)){MacroManager.cycleAxeSlot(1);return true;}
             return true;
         }
         int lx=left+124,ly=top+HEADER+46;
