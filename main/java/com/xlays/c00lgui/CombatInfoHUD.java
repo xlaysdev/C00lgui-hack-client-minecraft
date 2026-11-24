@@ -52,14 +52,14 @@ public final class CombatInfoHUD {
                 "YOU  " + playerHealth + "/" + playerMaxHealth + " HP",
                 X + 4, Y + 3, 0xFF75E0B0, false);
         g.drawString(mc.font,
-                "ARMOR  " + armor + "    ATTACK  " + cooldown + "%",
+                "ARM " + armor + "   CD " + cooldown + "%",
                 X + 4, Y + 3 + ROW_HEIGHT, 0xFFE5EAF4, false);
 
         if (hasTarget && target instanceof LivingEntity living) {
             String name = living.getName().getString();
-            if (name.length() > 18) name = name.substring(0, 18) + "…";
-            String targetLine = "TARGET  " + name + "  "
-                    + Math.max(0, Math.round(living.getHealth())) + " HP";
+            if (name.length() > 14) name = name.substring(0, 14) + "…";
+            String targetLine = "TGT  " + name + "  "
+                    + Math.max(0, Math.round(living.getHealth())) + "HP";
             g.drawString(mc.font, targetLine, X + 4,
                     Y + 3 + ROW_HEIGHT * 2, 0xFFFFA0B0, false);
         }
