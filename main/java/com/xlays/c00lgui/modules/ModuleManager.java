@@ -38,6 +38,7 @@ public final class ModuleManager {
         register("Step", "MOVEMENT");
         register("NoFall", "MOVEMENT");
 
+        register("CombatHUD", "COMBAT");
         register("Reach", "COMBAT");
         register("AutoClicker", "COMBAT");
         register("AimAssist", "COMBAT");
@@ -252,6 +253,7 @@ public final class ModuleManager {
             case "Step" -> Step.setEnabled(enabled);
             case "NoFall" -> NoFall.setEnabled(enabled);
 
+            case "CombatHUD" -> { /* Rendered by CombatInfoHUD when enabled. */ }
             case "Reach" -> Reach.setEnabled(enabled);
             case "AutoClicker" -> AutoClicker.setEnabled(enabled);
             case "AimAssist" -> AimAssist.setEnabled(enabled);
