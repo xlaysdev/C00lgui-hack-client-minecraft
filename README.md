@@ -8,6 +8,7 @@ A client-side Minecraft 1.21.11 / NeoForge project focused on a polished, touch-
 - Per-module settings with persistent configuration in `config/c00lgui.json`.
 - Right Shift opens the ClickGUI; Escape closes it.
 - Lightweight FPS HUD.
+- Optional CombatHUD with local health, armor, attack cooldown, and crosshair-target health.
 
 ## Build
 This project uses Java 21 and Gradle.
